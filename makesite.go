@@ -1,11 +1,12 @@
 package main
 
 import (
+	"flag"
 	"fmt"
-	"io/ioutil"
-	"strings"
 	"html/template"
+	"io/ioutil"
 	"os"
+	"strings"
 )
 
 // Page holds all the information we need to generate a new
@@ -16,56 +17,69 @@ type Page struct {
 }
 
 func main() {
-	fmt.Println("Hello, World!")
+	fileFlag := flag.String("file", "first-post.txt", "String representing a .txt file to read from")
+	flag.Parse()
 
-	// Read in the contents of the provided first-post.txt file
-	fileContents, err := ioutil.ReadFile("first-post.txt")
+	fmt.Println("File: ", *fileFlag)
+
+	fileContents, err := readFile(*fileFlag)
 	if err != nil {
 		panic(err)
 	}
-	fmt.Print(string(fileContents))
 
-	// split the file contents into two parts: the title and the body using slices
-	title := string(fileContents[0:16])
-	body := string(fileContents[16:])
+	title, body := parseContent(fileContents)
 
-	// remove any leading or trailing white space from the title and body using the "strings" package
-	body = strings.TrimSpace(body)
+	page := createPage(title, body)
 
-	// print the title and body to stdout
+	err = processTemplate("template.tmpl", page)
+	if err != nil {
+		panic(err)
+	}
+
+	err = createHTMLFile(*fileFlag, page)
+	if err != nil {
+		panic(err)
+	}
+}
+
+func readFile(fileName string) ([]byte, error) {
+	return ioutil.ReadFile(fileName)
+}
+
+func parseContent(contents []byte) (string, string) {
+	title := string(contents[0:16])
+	body := strings.TrimSpace(string(contents[16:]))
 	fmt.Println("Title: ", title)
 	fmt.Println("Body: ", body)
+	return title, body
+}
 
-	// Create a new page struct and populate it with the title and body
-	page := Page{
-		Title:      string(title),
-		Body: 		 	string(body),
+func createPage(title, body string) Page {
+	return Page{
+		Title: title,
+		Body:  body,
 	}
+}
 
-	// Create a new template in memory named "template.tmpl"
-	// When the template is executed, it will parse template.tmpl,
-	// looking for {{ }} where we can inject content.
-
-	tmpl := template.Must(template.New("template.tmpl").ParseFiles("template.tmpl"))
+func processTemplate(templateName string, page Page) error {
+	tmpl, err := template.ParseFiles(templateName)
 	if err != nil {
-		panic(err)
+		return err
 	}
+	return tmpl.Execute(os.Stdout, page)
+}
 
-	// Execute the template with the contents of first-post.txt and write to stdout
-	err = tmpl.Execute(os.Stdout, page)
+func createHTMLFile(fileName string, page Page) error {
+	newFileName := strings.TrimSuffix(fileName, ".txt") + ".html"
+	newFile, err := os.Create(newFileName)
 	if err != nil {
-		panic(err)
+		return err
 	}
+	defer newFile.Close()
 
-	// Create a new, blank HTML file named first-post.html.
-	newFile, err := os.Create("first-post.html")
+	tmpl, err := template.ParseFiles("template.tmpl")
 	if err != nil {
-				panic(err)
+		return err
 	}
-
-	// Executing the template injects the Page instance's data,
-	// allowing us to render the content of our text file.
-	// Furthermore, upon execution, the rendered template will be
-	// saved inside the new file we created earlier.
-	tmpl.Execute(newFile, page)
+	return tmpl.Execute(newFile, page)
 }
