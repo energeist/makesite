@@ -68,8 +68,8 @@ If you get stuck on any step, be sure to print the output to `stdout`!
 
 #### v1.1 Requirements
 
-- [ ] Create 3 new `.txt` files for testing in the same directory as your project.
-- [ ] Add a new flag to the `makesite` command named `dir`.
+- [x] Create 3 new `.txt` files for testing in the same directory as your project.
+- [x] Add a new flag to the `makesite` command named `dir`.
 - [ ] Use the flag to find all `.txt` files in the given directory. Print them to `stdout`.
 - [ ] With the list of `.txt` files you found, generate an HTML page for each.
 - [ ] Run `./makesite --dir=.` to test in your local directory.
