@@ -70,17 +70,17 @@ If you get stuck on any step, be sure to print the output to `stdout`!
 
 - [x] Create 3 new `.txt` files for testing in the same directory as your project.
 - [x] Add a new flag to the `makesite` command named `dir`.
-- [ ] Use the flag to find all `.txt` files in the given directory. Print them to `stdout`.
-- [ ] With the list of `.txt` files you found, generate an HTML page for each.
-- [ ] Run `./makesite --dir=.` to test in your local directory.
-- [ ] **Add, commit, and push to GitHub**.
+- [x] Use the flag to find all `.txt` files in the given directory. Print them to `stdout`.
+- [x] With the list of `.txt` files you found, generate an HTML page for each.
+- [x] Run `./makesite --dir=.` to test in your local directory.
+- [x] **Add, commit, and push to GitHub**.
 
 #### v1.1 Stretch Challenges
 
-- [ ] Recursively find all `.txt` files in the given directory, as well as it's subdirectories. Print them to `stdout` to make sure. Generate an HTML page for each.
-- [ ] When your program finishes, print: `Success! Generated 5 pages.` The `Success!` substring must be <span style="color: green; font-weight:bold;">bold green</span>, and the count (`5`) must be **bold**.
-- [ ] Modify the success message to read: `Success! Generated 5 pages (18.2kB total).` Calculate the total by summing the size of each HTML file, then converting the total to kilobytes. Always return one significant digit after the decimal point.
-- [ ] Determine how long it took to execute your static site generator. Modify the success message to read: `Success! Generated 5 pages (18.2kB total) in 3.25 seconds.` Always return two significant digits after the decimal point.
+- [x] Recursively find all `.txt` files in the given directory, as well as it's subdirectories. Print them to `stdout` to make sure. Generate an HTML page for each.
+- [x] When your program finishes, print: `Success! Generated 5 pages.` The `Success!` substring must be <span style="color: green; font-weight:bold;">bold green</span>, and the count (`5`) must be **bold**.
+- [x] Modify the success message to read: `Success! Generated 5 pages (18.2kB total).` Calculate the total by summing the size of each HTML file, then converting the total to kilobytes. Always return one significant digit after the decimal point.
+- [x] Determine how long it took to execute your static site generator. Modify the success message to read: `Success! Generated 5 pages (18.2kB total) in 3.25 seconds.` Always return two significant digits after the decimal point.
 - [ ] Test your solutions to these stretch challenges on many different directories containing `.txt` files. Are there any ways to make your code faster?
 
 ### v1.2

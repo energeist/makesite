@@ -3,8 +3,10 @@ package main
 import (
 	"flag"
 	"fmt"
+	"github.com/ttacon/chalk"
+	// "github.com/jbrodriguez/mlog"
 	"html/template"
-	// "io/fs"
+	"io/fs"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -36,8 +38,18 @@ func main() {
 	}
 
 	endTime := time.Now()
+	
+	htmlSize, _ := calcFileSizeInDirectory("pages")
 
-	fmt.Println("Time elapsed: ", endTime.Sub(startTime))
+	greenAndBold := chalk.Green.NewStyle().
+		WithTextStyle(chalk.Bold).
+		Style
+	
+	// This style didn't work properly in my terminal so I just used vanilla escape codes instead.
+	// bold := chalk.Bold.NewStyle().Style
+
+	// This is supposed to be green but may appear differently in your terminal depending on theme settings, it seems.
+	fmt.Printf(greenAndBold("\nSuccess!") + " Generated \033[1m%v\033[0m HTML files in the pages directory.  Wrote %.1f kB in %v.\n", len(textFiles), htmlSize, endTime.Sub(startTime))
 }
 
 func getTextFiles(dir string) ([]string, error) {
@@ -74,7 +86,7 @@ func processTextFiles(file string) {
 		panic(err)
 	}
 
-	fmt.Println("File contents: ", string(fileContents))
+	// fmt.Println("File contents: ", string(fileContents))
 
 	title, body := parseContent(fileContents)
 
@@ -123,6 +135,7 @@ func createHTMLFile(fileName string, page Page) error {
 	newFileName := strings.TrimSuffix(fileName, ".txt") + ".html"
 	newFileName = "pages/" + newFileName
 	newFile, err := os.Create(newFileName)
+
 	if err != nil {
 		return err
 	}
@@ -135,6 +148,29 @@ func createHTMLFile(fileName string, page Page) error {
 	return tmpl.Execute(newFile, page)
 }
 
+func calcFileSizeInDirectory(directory string) (float64, error) {
+	var size float64
+
+	err := filepath.Walk(directory, func(path string, info fs.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+
+		// convert size from int to float64
+
+		size += float64(info.Size())
+
+		return nil
+	})
+
+	if err != nil {
+		return 0, err
+	}
+
+	size = size / 1024 // convert from bits to KB
+
+	return size, nil
+}
 // func getTextFiles(directory string) ([]string, error) {
 // 	fmt.Println("Parsing directory: ", directory)
 // 	files, err := ioutil.ReadDir(directory)
