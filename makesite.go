@@ -4,7 +4,7 @@ import (
 	"flag"
 	"fmt"
 	"github.com/ttacon/chalk"
-	// "github.com/jbrodriguez/mlog"
+	"github.com/jbrodriguez/mlog"
 	"html/template"
 	"io/fs"
 	"io/ioutil"
@@ -22,16 +22,24 @@ type Page struct {
 }
 
 func main() {
+	// start mlog with a log level of info, log to makesite.log, rotate at 100kB, keep 5 logs
+	mlog.StartEx(mlog.LevelInfo, "makesite.log", 100*1024, 5)
+	mlog.Info("Starting makesite...")
 	startTime := time.Now()
+
 	fileFlag := flag.String("file", "text/first-post.txt", "String representing a .txt file to read from")
 	dirFlag := flag.String("dir", "text", "String representing a directory to read from")
+	
 	flag.Parse()
 
-	fmt.Println("File: ", *fileFlag)
-	fmt.Println("Dir: ", *dirFlag)
+	mlog.Info("Parsed flags from CLI:")
+	mlog.Info("File: %v", *fileFlag)
+	mlog.Info("Dir: %v", *dirFlag)
 
 	textFiles, _ := getTextFiles(*dirFlag)
-	fmt.Println(textFiles)
+	
+	mlog.Info("Found %v text files in directory /%v/:", len(textFiles), *dirFlag)
+	mlog.Info(strings.Join(textFiles, ", "))
 
 	for _, file := range textFiles {
 		processTextFiles(file)
@@ -50,6 +58,7 @@ func main() {
 
 	// This is supposed to be green but may appear differently in your terminal depending on theme settings, it seems.
 	fmt.Printf(greenAndBold("\nSuccess!") + " Generated \033[1m%v\033[0m HTML files in the pages directory.  Wrote %.1f kB in %v.\n", len(textFiles), htmlSize, endTime.Sub(startTime))
+	mlog.Info("Success! Generated %v HTML files in the pages directory. Wrote %.1f kB in %v.", len(textFiles), htmlSize, endTime.Sub(startTime))
 }
 
 func getTextFiles(dir string) ([]string, error) {
@@ -63,9 +72,9 @@ func getTextFiles(dir string) ([]string, error) {
 
 		// Check if the file is a .txt file
 		if !info.IsDir() && strings.HasSuffix(info.Name(), ".txt") {
-			fmt.Println("Found text file: ", path)
+			mlog.Info("Found text file: ", path)
 
-			fmt.Println("File name: ", info.Name())
+			mlog.Info("File name: ", info.Name())
 
 			files = append(files, path)
 		}
@@ -94,11 +103,15 @@ func processTextFiles(file string) {
 
 	err = processTemplate("template.tmpl", page)
 	if err != nil {
+		mlog.Warning("Error processing template template.tmpl")
+		mlog.Error(err)
 		panic(err)
 	}
 
 	err = createHTMLFile(file, page)
 	if err != nil {
+		mlog.Warning("Error creating HTML file: %v", file)
+		mlog.Error(err)
 		panic(err)
 	}
 }
@@ -124,6 +137,8 @@ func createPage(title, body string) Page {
 func processTemplate(templateName string, page Page) error {
 	tmpl, err := template.ParseFiles(templateName)
 	if err != nil {
+		mlog.Warning("Error parsing template: %v", templateName)
+		mlog.Error(err)
 		return err
 	}
 	return tmpl.Execute(os.Stdout, page)
@@ -137,12 +152,16 @@ func createHTMLFile(fileName string, page Page) error {
 	newFile, err := os.Create(newFileName)
 
 	if err != nil {
+		mlog.Warning("Error creating new HTML file %v", fileName)
+		mlog.Error(err)
 		return err
 	}
 	defer newFile.Close()
 
 	tmpl, err := template.ParseFiles("template.tmpl")
 	if err != nil {
+		mlog.Warning("Error parsing template: template.tmpl")
+		mlog.Error(err)
 		return err
 	}
 	return tmpl.Execute(newFile, page)
@@ -153,10 +172,10 @@ func calcFileSizeInDirectory(directory string) (float64, error) {
 
 	err := filepath.Walk(directory, func(path string, info fs.FileInfo, err error) error {
 		if err != nil {
+			mlog.Warning("Error walking directory %v to calculate file sizes: %v", directory)
+			mlog.Error(err)
 			return err
 		}
-
-		// convert size from int to float64
 
 		size += float64(info.Size())
 
@@ -164,6 +183,8 @@ func calcFileSizeInDirectory(directory string) (float64, error) {
 	})
 
 	if err != nil {
+		mlog.Warning("Error calculating file size in directory: %v", directory)
+		mlog.Error(err)
 		return 0, err
 	}
 
@@ -171,24 +192,4 @@ func calcFileSizeInDirectory(directory string) (float64, error) {
 
 	return size, nil
 }
-// func getTextFiles(directory string) ([]string, error) {
-// 	fmt.Println("Parsing directory: ", directory)
-// 	files, err := ioutil.ReadDir(directory)
-// 	if err != nil {
-// 		return nil, err
-// 	}
-
-// 	textFiles := []string{}
-
-// 	for _, file := range files {
-// 		if file.IsDir() {
-// 			fmt.Println("New Directory: ", file.Name())
-// 			return parseDir(file.Name())
-// 		} else {
-// 		fmt.Println(file.Name())
-// 		textFiles = append(textFiles, file.Name())
-// 		}
-// 	}
-// 	return textFiles, nil
-// }
 
