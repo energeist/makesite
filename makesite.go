@@ -3,8 +3,6 @@ package main
 import (
 	"flag"
 	"fmt"
-	"github.com/ttacon/chalk"
-	"github.com/jbrodriguez/mlog"
 	"html/template"
 	"io/fs"
 	"io/ioutil"
@@ -12,6 +10,9 @@ import (
 	"path/filepath"
 	"strings"
 	"time"
+
+	"github.com/jbrodriguez/mlog"
+	"github.com/ttacon/chalk"
 )
 
 // Page holds all the information we need to generate a new
